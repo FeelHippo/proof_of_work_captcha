@@ -2,10 +2,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:intl/intl.dart';
 import 'package:cryptography/cryptography.dart';
-import 'package:collection/collection.dart';
+import 'package:convert/convert.dart';
 
 NumberFormat formatter = NumberFormat('000000');
-Function equals = const ListEquality().equals;
 
 // Expect a payload such as
 // {
@@ -19,19 +18,10 @@ Future<void> main() async {
   const String id = 'challenge1';
   const int min = 0;
   const int max = 1000;
-  const List<int> salt = [
-    166, 107, 123,  44,  47,
-    165,  41,  57, 220, 167,
-    153,  27, 131, 234,  91,
-    60
-  ];
+  const String salt = 'xgJFAXupU5ksJBrQevW9Tw==';
   // hash == salt + random number => argon2id()
-  const hash = [
-    225, 125, 161, 128, 236, 227,  23,   9,
-    223, 175, 182, 252, 217,  19, 175, 122,
-    55,  24,  96,  82, 202,  65, 229,  36,
-    180, 212, 252, 145, 176,  34, 101, 160
-  ];
+  const hash =
+      '2f4e60914b44ff085e6f879b3ed8c8762e0b8b6c658e8501bbb974fe5dd56a9f';
 
   // Define algorithm -- should align with BE
   final Argon2id algorithm = Argon2id(
@@ -49,24 +39,24 @@ Future<void> main() async {
 
     // format nounce to add padding zeroes
     final paddedNounce = formatter.format(nounce);
-    print('current Nounce: $paddedNounce');
     // Represents UTF-8 encoded nounce
-    final Uint8List challengeBytes = utf8.encode(paddedNounce);
+    final Uint8List solutionBytes = utf8.encode(paddedNounce);
+    // Represents UTF-8 encoded salt
+    final Uint8List saltBytes = utf8.encode(salt);
 
     // Calculate output of Argon2id algorithm
     final SecretKey newSecretKey = await algorithm.deriveKey(
-      secretKey: SecretKey(challengeBytes),
-      nonce: salt, // this is provided by the server
+      secretKey: SecretKey(solutionBytes),
+      nonce: saltBytes, // this is provided by the server
     );
-    print('new Secret Key: $newSecretKey'); // SecretKeyData(...)
 
     // newSecretKey converted into bytes
-    final List<int> secretKeyData = await newSecretKey.extractBytes();
-    print('secretKeyData: $secretKeyData');
-    print('hashBytes: $hash');
+    final List<int> currentHashBytes = (await newSecretKey.extract()).bytes;
+    // convert into hex
+    final String currentHashString = hex.encode(currentHashBytes);
 
-    if (equals(secretKeyData, hash)) {
-      print('Success: return $nounce');
+    if (currentHashString == hash) {
+      print('Success: return $paddedNounce');
       break;
     }
 

@@ -12,22 +12,24 @@ interface ClientPayload {
   challenge_id: string;
   min: number;
   complexity: number;
-  salt: Uint8Array;
-  hash: Uint8Array;
+  salt: string;
+  hash: string;
 }
 
 const min = 0;
-const complexity = 50;
+const complexity = 1000;
 
 async function createTestChallenge(): Promise<{ 
   solution: string, 
-  challenge: Uint8Array, 
-  salt: Uint8Array,
+  challenge: string,
+  salt: string,
 }> {
 
   // salt is a buffer containing random bytes
-  const salt = new Uint8Array(16);
-  crypto.webcrypto.getRandomValues(salt);
+  const binary_salt = new Uint8Array(16);
+  crypto.webcrypto.getRandomValues(binary_salt);
+
+  const salt = Buffer.from(binary_salt).toString('base64');
   console.log(`[setting salt to ${salt}]`);
 
   // the actual solution of the challenge is a random int
@@ -36,7 +38,6 @@ async function createTestChallenge(): Promise<{
 
   const challenge = await argon2idChallenge(salt, solution);
   console.log(`[setting challenge to ${challenge}]`);
-
   return { solution, challenge, salt };
 }
 
@@ -44,9 +45,9 @@ async function createTestChallenge(): Promise<{
 const zeroPad = (num: number, places: number) => String(num).padStart(places, '0');
 
 async function argon2idChallenge(
-  salt: Uint8Array,
+  salt: string,
   solution: string,
-): Promise<Uint8Array> {
+): Promise<string> {
     // generate key
     // https://www.npmjs.com/package/hash-wasm#string-encoding-pitfalls
     return argon2id({
@@ -56,7 +57,7 @@ async function argon2idChallenge(
         iterations: 1, // For more security, you should usually raise memory parameter, not iterations.
         memorySize: 10*1000, // 10 MB
         hashLength: 32, // output size = 32 bytes
-        outputType: 'binary',
+        outputType: 'hex',
     });
 }
 
@@ -69,6 +70,7 @@ async function solveChallenge(
 
   while (nonce < complexity) {
     console.log('---| ', nonce);
+    // Format nounce to add padding
     const current_solution = zeroPad(nonce, 6);
     const current_hash =
       await argon2idChallenge(payload.salt, current_solution);
