@@ -46,7 +46,8 @@ class PoW {
       nounce += 1;
     }
     final DateTime endTime = DateTime.now();
-    final itTookToComplete = endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch;
+    final itTookToComplete =
+        endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch;
 
     return ChallengeResponseModel(
       uuidv4: challengePayload.uuidv4,

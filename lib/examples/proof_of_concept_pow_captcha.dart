@@ -66,7 +66,7 @@ Future<void> main() async {
     final String currentHashString = hex.encode(currentHashBytes);
 
     if (currentHashString == hash) {
-      print('Success: return $paddedNounce');
+      print('Success: return $paddedNounce solutionBytes: $solutionBytes saltBytes: $saltBytes');
       break;
     }
 
