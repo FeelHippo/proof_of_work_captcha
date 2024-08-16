@@ -8,10 +8,20 @@ NumberFormat formatter = NumberFormat('000000');
 
 // Expect a payload such as
 // {
-//   min:0,
-//   max: 200000,
-//   prefix: 'randomabc',
-//   hash: 'fPn4sPgkFAuBJo3M3UzcGss3dJysxLJdPdvojRF20ZE=',
+//    id: uuidv4
+//    min: int, (always 0 i guess)
+//    max: int,
+//    prefix: str, (aka salt)
+//    challenge: str (aka hex-coded hash)
+//    algorithm: {
+//      type: 'argon2id',
+//      options: {
+//        memory: int,
+//        parallelism: int,
+//        iterations: int,
+//        hashLength: int
+//      }
+//    }
 // }
 Future<void> main() async {
   // The following will be returned by MPS
