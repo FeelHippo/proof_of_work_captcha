@@ -24,7 +24,7 @@ class PoW {
 
     final DateTime startTime = DateTime.now();
     int nounce = NumericConstants.min;
-    var solution;
+    int solution = 0;
 
     while(nounce < challengePayload.range) {
 
@@ -47,11 +47,11 @@ class PoW {
       nounce += 1;
     }
     final DateTime endTime = DateTime.now();
-    final itTookToComplete =
+    final int itTookToComplete =
         endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch;
 
     return ChallengeResponseModel(
-      uuidv4: challengePayload.id,
+      id: challengePayload.id,
       solution: solution,
       milliseconds: itTookToComplete,
     );
