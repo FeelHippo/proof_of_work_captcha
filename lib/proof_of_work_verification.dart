@@ -11,7 +11,7 @@ import 'package:proof_of_work_verification/models/challenge_response_model.dart'
 
 class PoW {
   /// Solve Challenge and return Solution
-  Future<ChallengeResponseModel> captcha(
+  static Future<ChallengeResponseModel> captcha(
       ChallengePayloadModel challengePayload,
   ) async {
 
