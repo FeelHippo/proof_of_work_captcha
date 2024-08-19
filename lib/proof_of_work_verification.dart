@@ -4,7 +4,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:cryptography/cryptography.dart';
 import 'package:convert/convert.dart';
-import 'package:intl/intl.dart';
+import 'package:proof_of_work_verification/constants/numeric.dart';
+import 'package:proof_of_work_verification/constants/string.dart';
 import 'package:proof_of_work_verification/models/challenge_payload_model.dart';
 import 'package:proof_of_work_verification/models/challenge_response_model.dart';
 
@@ -15,20 +16,20 @@ class PoW {
   ) async {
 
     final Argon2id algorithm = Argon2id(
-      memory: challengePayload.algorithm.options.memory,
-      parallelism: challengePayload.algorithm.options.parallelism,
-      iterations: challengePayload.algorithm.options.iterations,
-      hashLength: challengePayload.algorithm.options.hashLength,
+      memory: challengePayload.algorithm.memoryCost,
+      parallelism: challengePayload.algorithm.parallelism,
+      iterations: challengePayload.algorithm.iterations,
+      hashLength: challengePayload.algorithm.hashLength,
     );
 
     final DateTime startTime = DateTime.now();
-    int nounce = challengePayload.min;
+    int nounce = NumericConstants.min;
     var solution;
 
-    while(nounce < challengePayload.max) {
+    while(nounce < challengePayload.range) {
 
-      final paddedNounce = NumberFormat('000000').format(nounce);
-      final Uint8List solutionBytes = utf8.encode(paddedNounce);
+      final Uint8List solutionBytes =
+        utf8.encode('$nounce${StringConstants.modifier}');
       final Uint8List saltBytes = utf8.encode(challengePayload.salt);
 
       final SecretKey newSecretKey = await algorithm.deriveKey(
@@ -40,7 +41,7 @@ class PoW {
       final String currentHashString = hex.encode(currentHashBytes);
 
       if (currentHashString == challengePayload.hash) {
-        solution = paddedNounce;
+        solution = nounce;
       }
 
       nounce += 1;
@@ -50,7 +51,7 @@ class PoW {
         endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch;
 
     return ChallengeResponseModel(
-      uuidv4: challengePayload.uuidv4,
+      uuidv4: challengePayload.id,
       solution: solution,
       milliseconds: itTookToComplete,
     );

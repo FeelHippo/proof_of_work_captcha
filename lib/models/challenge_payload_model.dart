@@ -2,26 +2,25 @@ import 'package:equatable/equatable.dart';
 
 class ChallengePayloadModel extends Equatable {
   const ChallengePayloadModel({
-    required this.uuidv4,
-    required this.min,
-    required this.max,
-    required this.salt,
+    required this.id,
+    required this.action, // from request
+    required this.range,
+    required this.salt, // aka prefix
     required this.hash,
     required this.algorithm,
   });
 
-  final String uuidv4;
-  final int min;
-  final int max;
+  final String id;
+  final String action;
+  final int range;
   final String salt;
   final String hash;
   final Algorithm algorithm;
 
   @override
   List<Object?> get props => <Object?>[
-    uuidv4,
-    min,
-    max,
+    id,
+    range,
     salt,
     hash,
     algorithm,
@@ -30,36 +29,23 @@ class ChallengePayloadModel extends Equatable {
 
 class Algorithm extends Equatable {
   const Algorithm({
-    required this.type,
-    required this.options,
-  });
-
-  final String type;
-  final Options options;
-
-  @override
-  List<Object?> get props => <Object?>[
-    type,
-    options,
-  ];
-}
-
-class Options extends Equatable {
-  const Options({
-    required this.memory,
+    required this.name,
+    required this.memoryCost,
     required this.parallelism,
     required this.iterations,
     required this.hashLength,
   });
 
-  final int memory;
+  final String name;
+  final int memoryCost;
   final int parallelism;
   final int iterations;
   final int hashLength;
 
   @override
   List<Object?> get props => <Object?>[
-    memory,
+    name,
+    memoryCost,
     parallelism,
     iterations,
     hashLength,
