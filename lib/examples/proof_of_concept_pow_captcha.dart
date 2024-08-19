@@ -6,20 +6,18 @@ import 'package:proof_of_work_verification/constants/string.dart';
 
 // Expect a payload such as
 // {
-//    id: uuidv4
-//    min: int, (always 0 i guess)
-//    max: int,
-//    prefix: str, (aka salt)
-//    challenge: str (aka hex-coded hash)
-//    algorithm: {
-//      type: 'argon2id',
-//      options: {
-//        memory: int,
-//        parallelism: int,
-//        iterations: int,
-//        hashLength: int
-//      }
-//    }
+//  "id": "6c2cbad0-5626-485d-b9ed-08457a6da44a",
+//  "action": "whatever_you_put_in_request",
+//  "prefix": "1234abcd",
+//  "range": 100,
+//  "algorithm": {
+//    "name": "argon2id",
+//    "memory_cost": 1024,
+//    "hash_length": 16,
+//    "parallelism": 1,
+//    "iterations": 1
+//  },
+//  "hash": "8ea09bf4f6ac1e0b60d3b70e5692821b"
 // }
 Future<void> main() async {
   // The following will be returned by MPS
