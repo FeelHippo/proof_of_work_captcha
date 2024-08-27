@@ -9,28 +9,37 @@ import 'package:proof_of_work_verification/constants/string.dart';
 import 'package:proof_of_work_verification/models/challenge_payload_model.dart';
 import 'package:proof_of_work_verification/models/challenge_response_model.dart';
 
-class PoW {
-  /// Solve Challenge and return Solution
-  static Future<ChallengeResponseModel> captcha(
-      ChallengePayloadModel challengePayload,
-  ) async {
+abstract class Challenge {
+  Challenge({ required this.challengePayload });
+  ChallengePayloadModel challengePayload;
+  Future<ChallengeResponseModel> captcha();
+}
+
+class PoW extends Challenge {
+  PoW({required super.challengePayload});
+
+  /// Solve Proof of Work challenge and return Solution
+  @override
+  Future<ChallengeResponseModel> captcha() async {
+
+    final payload = challengePayload;
 
     final Argon2id algorithm = Argon2id(
-      memory: challengePayload.algorithm.memoryCost,
-      parallelism: challengePayload.algorithm.parallelism,
-      iterations: challengePayload.algorithm.iterations,
-      hashLength: challengePayload.algorithm.hashLength,
+      memory: payload.algorithm.memoryCost,
+      parallelism: payload.algorithm.parallelism,
+      iterations: payload.algorithm.iterations,
+      hashLength: payload.algorithm.hashLength,
     );
 
     final DateTime startTime = DateTime.now();
     int nounce = NumericConstants.min;
     int solution = 0;
 
-    while(nounce < challengePayload.range) {
+    while(nounce < payload.range) {
 
       final Uint8List solutionBytes =
         utf8.encode('$nounce${StringConstants.modifier}');
-      final Uint8List saltBytes = utf8.encode(challengePayload.salt);
+      final Uint8List saltBytes = utf8.encode(payload.salt);
 
       final SecretKey newSecretKey = await algorithm.deriveKey(
         secretKey: SecretKey(solutionBytes),
@@ -40,7 +49,7 @@ class PoW {
       final List<int> currentHashBytes = (await newSecretKey.extract()).bytes;
       final String currentHashString = hex.encode(currentHashBytes);
 
-      if (currentHashString == challengePayload.hash) {
+      if (currentHashString == payload.hash) {
         solution = nounce;
       }
 
@@ -51,7 +60,7 @@ class PoW {
         endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch;
 
     return ChallengeResponseModel(
-      id: challengePayload.id,
+      id: payload.id,
       solution: solution,
       milliseconds: itTookToComplete,
     );
